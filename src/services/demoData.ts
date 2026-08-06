@@ -1,6 +1,12 @@
 import { addDays, formatISO } from 'date-fns'
-import { db } from './db/client'
-import { semestersRepo, subjectsRepo, eventsRepo, gradesRepo, chatRepo } from './db/repositories'
+import {
+  semestersRepo,
+  subjectsRepo,
+  eventsRepo,
+  gradesRepo,
+  chatRepo,
+  sessionsRepo,
+} from './db/repositories'
 
 const DEMO_SEMESTER_NAME = 'Semestre demo'
 
@@ -147,29 +153,38 @@ export async function seedDemoData(): Promise<void> {
 }
 
 export async function isDemoDataPresent(): Promise<boolean> {
-  const semesters = await db.semesters.toArray()
-  return semesters.some((s) => s.name === DEMO_SEMESTER_NAME && !s.deletedAt)
+  const semesters = await semestersRepo.list()
+  return semesters.some((s) => s.name === DEMO_SEMESTER_NAME)
 }
 
+/**
+ * Borra los datos de ejemplo pasando por cada repositorio (no directo en
+ * Dexie): así el borrado también se empuja a Supabase para quien tenga
+ * cuenta conectada. Antes se borraba solo local y la próxima sincronización
+ * los volvía a traer de la nube como si nunca se hubieran eliminado.
+ */
 export async function removeDemoData(): Promise<void> {
-  const semesters = await db.semesters.where('name').equals(DEMO_SEMESTER_NAME).toArray()
-  const semesterIds = semesters.map((s) => s.id)
-  if (!semesterIds.length) return
+  const semesters = (await semestersRepo.list()).filter((s) => s.name === DEMO_SEMESTER_NAME)
+  if (!semesters.length) return
+  const semesterIds = new Set(semesters.map((s) => s.id))
 
-  const subjects = await db.subjects.where('semesterId').anyOf(semesterIds).toArray()
-  const subjectIds = subjects.map((s) => s.id)
+  const subjects = (await subjectsRepo.list()).filter((s) => semesterIds.has(s.semesterId))
+  const subjectIds = new Set(subjects.map((s) => s.id))
 
-  await db.transaction(
-    'rw',
-    [db.semesters, db.subjects, db.events, db.studySessions, db.grades, db.chatMessages, db.attachments],
-    async () => {
-      await db.semesters.bulkDelete(semesterIds)
-      await db.subjects.bulkDelete(subjectIds)
-      await db.events.where('subjectId').anyOf(subjectIds).delete()
-      await db.studySessions.where('subjectId').anyOf(subjectIds).delete()
-      await db.grades.where('subjectId').anyOf(subjectIds).delete()
-      await db.chatMessages.where('subjectId').anyOf(subjectIds).delete()
-      await db.attachments.where('subjectId').anyOf(subjectIds).delete()
-    },
-  )
+  const [events, sessions, grades, chats] = await Promise.all([
+    eventsRepo.list(),
+    sessionsRepo.list(),
+    gradesRepo.list(),
+    chatRepo.list(),
+  ])
+
+  await Promise.all([
+    ...events.filter((e) => e.subjectId && subjectIds.has(e.subjectId)).map((e) => eventsRepo.remove(e.id)),
+    ...sessions.filter((s) => subjectIds.has(s.subjectId)).map((s) => sessionsRepo.remove(s.id)),
+    ...grades.filter((g) => subjectIds.has(g.subjectId)).map((g) => gradesRepo.remove(g.id)),
+    ...chats.filter((c) => c.subjectId && subjectIds.has(c.subjectId)).map((c) => chatRepo.remove(c.id)),
+  ])
+
+  await Promise.all([...subjectIds].map((id) => subjectsRepo.remove(id)))
+  await Promise.all([...semesterIds].map((id) => semestersRepo.remove(id)))
 }
