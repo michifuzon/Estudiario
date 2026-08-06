@@ -138,7 +138,7 @@ export function AssistantScreen() {
         )}
       </div>
 
-      <div className="sticky bottom-[3.25rem] z-10 mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)] sm:bottom-2">
+      <div className="sticky bottom-[var(--bottom-nav-h)] z-10 mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)] sm:bottom-2">
         <input
           ref={fileInputRef}
           type="file"

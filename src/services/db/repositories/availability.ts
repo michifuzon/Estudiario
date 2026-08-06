@@ -26,13 +26,10 @@ async function pushRemote(record: AvailabilitySettings) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return
-  try {
-    await supabase
-      .from('availability')
-      .upsert(availabilityMapper.toRow(record, user.id), { onConflict: 'user_id' })
-  } catch {
-    // se reintenta en la próxima escritura
-  }
+  const { error } = await supabase
+    .from('availability')
+    .upsert(availabilityMapper.toRow(record, user.id), { onConflict: 'user_id' })
+  if (error) console.error('[sync] no se pudo guardar la disponibilidad en Supabase:', error.message)
 }
 
 export const availabilityRepo = {
@@ -55,7 +52,7 @@ export const availabilityRepo = {
     const updated = touch({ ...current, ...patch })
     await db.availability.put(updated)
     queueChange('availability', SINGLETON_ID, 'upsert')
-    void pushRemote(updated)
+    await pushRemote(updated)
     return updated
   },
 

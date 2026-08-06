@@ -35,6 +35,11 @@
 }
 
 :root {
+  /* alto real de la barra inferior mobile (BottomNav) — cualquier elemento
+     que necesite despegarse de ella (composer del chat, etc.) se alinea
+     contra esta misma variable en vez de estimar un valor aparte. */
+  --bottom-nav-h: 56px;
+
   /* --- superficies: cálidas, nunca blanco ni negro puro --- */
   --paper: #f5f2ec;
   --surface: #fcfbf8;

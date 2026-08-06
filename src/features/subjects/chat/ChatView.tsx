@@ -123,7 +123,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="sticky bottom-[3.25rem] z-10 sm:bottom-0">
+      <div className="sticky bottom-[var(--bottom-nav-h)] z-10 sm:bottom-0">
         <ChatComposer subjectId={subjectId} />
       </div>
       <MessageActionsSheet message={activeMessage} onClose={() => setActiveMessage(null)} />

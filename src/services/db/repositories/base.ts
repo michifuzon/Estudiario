@@ -14,10 +14,13 @@ export interface RemoteSync<T> {
  * Cada repositorio de entidad (subjects.ts, events.ts, etc.) usa esto como base
  * y agrega sus propias consultas específicas encima.
  *
- * Si se pasa `remote`, cada escritura local se espeja "best effort" contra la
- * tabla de Supabase correspondiente (cuando hay sesión iniciada). Dexie sigue
- * siendo la fuente que lee la UI — esto solo empuja hacia la nube para que
- * los datos sobrevivan a un dispositivo nuevo o una cuenta reconectada.
+ * Si se pasa `remote`, cada escritura local se espeja contra la tabla de
+ * Supabase correspondiente (cuando hay sesión iniciada). Se espera a que
+ * termine (no es fire-and-forget): así, si una materia depende de un
+ * semestre creado un instante antes, el semestre ya está guardado en el
+ * servidor cuando se intenta guardar la materia — evita errores de clave
+ * foránea por orden de llegada. Dexie sigue siendo lo que lee la UI, así
+ * que la espera no la nota el usuario salvo por la latencia de red real.
  */
 export function createRepository<T extends BaseRecord>(
   table: Table<T, string>,
@@ -30,11 +33,11 @@ export function createRepository<T extends BaseRecord>(
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) return
-    try {
-      await supabase.from(remote.tableName).upsert(remote.toRow(record, user.id))
-    } catch {
-      // sin conexión o error transitorio: el dato ya está a salvo en Dexie,
-      // se reintentará en la próxima escritura o sincronización manual.
+    const { error } = await supabase.from(remote.tableName).upsert(remote.toRow(record, user.id))
+    if (error) {
+      // El dato ya está a salvo en Dexie. Lo dejamos en consola para poder
+      // diagnosticar (RLS, FK, columna faltante, etc.) sin romper la UI.
+      console.error(`[sync] no se pudo guardar "${entity}" (${record.id}) en Supabase:`, error.message)
     }
   }
 
@@ -53,7 +56,7 @@ export function createRepository<T extends BaseRecord>(
       const record = { ...newBaseRecord(), ...data } as unknown as T
       await table.put(record)
       queueChange(entity, record.id, 'upsert')
-      void pushRemote(record)
+      await pushRemote(record)
       return record
     },
 
@@ -63,7 +66,7 @@ export function createRepository<T extends BaseRecord>(
       const updated = touch({ ...existing, ...patch }) as T
       await table.put(updated)
       queueChange(entity, id, 'upsert')
-      void pushRemote(updated)
+      await pushRemote(updated)
       return updated
     },
 
@@ -73,7 +76,7 @@ export function createRepository<T extends BaseRecord>(
       const removed = touch({ ...existing, deletedAt: new Date().toISOString() }) as T
       await table.put(removed)
       queueChange(entity, id, 'delete')
-      void pushRemote(removed)
+      await pushRemote(removed)
     },
 
     async hardRemove(id: string): Promise<void> {
