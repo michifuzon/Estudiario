@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie'
 import type {
   AIProviderSettings,
   Attachment,
+  AssistantMessage,
   AvailabilitySettings,
   ChatMessage,
   EventItem,
@@ -40,6 +41,7 @@ export class EstudiarioDB extends Dexie {
   aiProviderSettings!: Table<AIProviderSettings, string>
   studyProfile!: Table<StudyProfile, string>
   syncOutbox!: Table<SyncOutboxEntry, string>
+  assistantMessages!: Table<AssistantMessage, string>
 
   constructor() {
     super('estudiario')
@@ -56,6 +58,11 @@ export class EstudiarioDB extends Dexie {
       aiProviderSettings: 'id',
       studyProfile: 'id',
       syncOutbox: '++seq, entity, recordId, queuedAt',
+    })
+    // v2: historial persistente del chat del Asistente (antes vivía solo en
+    // memoria y se perdía al recargar la página).
+    this.version(2).stores({
+      assistantMessages: 'id, createdAt',
     })
   }
 }

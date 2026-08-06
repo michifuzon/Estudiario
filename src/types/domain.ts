@@ -232,3 +232,12 @@ export interface StudyProfile extends BaseRecord {
   anticipationDays: number
   studyMethod: string
 }
+
+export interface AssistantMessage {
+  id: ID
+  role: 'user' | 'assistant'
+  text: string
+  /** si este turno vino con una propuesta de evento (foto o texto), se guarda para poder re-renderizarla */
+  proposal: unknown | null
+  createdAt: string
+}
