@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { format, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -44,6 +44,30 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
     if (filter === 'importantes') return base.filter((m) => m.status === 'importante')
     return base.filter((m) => m.type === filter)
   }, [messages, searchResults, query, filter])
+
+  // El chat arranca anclado al último mensaje (como cualquier chat) y se
+  // mantiene ahí mientras se agregan mensajes nuevos, pero si el usuario
+  // scrollea hacia arriba a leer algo viejo, no lo interrumpimos saltando
+  // solos al final.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const stickToBottomRef = useRef(true)
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+    stickToBottomRef.current = true
+  }, [subjectId])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el && stickToBottomRef.current) el.scrollTop = el.scrollHeight
+  }, [filtered.length])
+
+  function handleScroll() {
+    const el = scrollRef.current
+    if (!el) return
+    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
 
   return (
     <div className="flex h-[calc(100svh-14rem)] min-h-[420px] flex-col sm:h-[calc(100svh-10rem)]">
@@ -95,7 +119,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         </div>
       )}
 
-      <div className="no-scrollbar flex-1 overflow-y-auto px-1">
+      <div ref={scrollRef} onScroll={handleScroll} className="no-scrollbar flex-1 overflow-y-auto px-1">
         {!filtered.length ? (
           <EmptyState
             title={query ? 'Sin resultados' : 'Todavía no hay nada acá'}
