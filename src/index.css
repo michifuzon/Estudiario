@@ -1,9 +1,4 @@
 @import "tailwindcss";
-@import "@fontsource/manrope/400.css";
-@import "@fontsource/manrope/500.css";
-@import "@fontsource/manrope/600.css";
-@import "@fontsource/manrope/700.css";
-@import "@fontsource/manrope/800.css";
 
 @theme {
   /* un único sistema tipográfico: la jerarquía viene del peso y el tamaño, no de mezclar familias */
