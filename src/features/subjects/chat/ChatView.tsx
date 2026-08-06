@@ -45,32 +45,24 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
     return base.filter((m) => m.type === filter)
   }, [messages, searchResults, query, filter])
 
-  // El chat arranca anclado al último mensaje (como cualquier chat) y se
-  // mantiene ahí mientras se agregan mensajes nuevos, pero si el usuario
-  // scrollea hacia arriba a leer algo viejo, no lo interrumpimos saltando
-  // solos al final.
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const stickToBottomRef = useRef(true)
+  // El chat vive en el flujo normal de la página (la scrollea `main`, como
+  // cualquier otra pantalla) — la barra para escribir es "sticky" al fondo,
+  // así queda siempre a mano sin tener que scrollear hasta abajo para
+  // encontrarla. Este sentinel es lo que usamos para saltar al último
+  // mensaje al abrir el chat o al enviar uno nuevo.
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const messageCount = messages?.length ?? 0
 
   useEffect(() => {
-    const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-    stickToBottomRef.current = true
+    bottomRef.current?.scrollIntoView({ block: 'end' })
   }, [subjectId])
 
   useEffect(() => {
-    const el = scrollRef.current
-    if (el && stickToBottomRef.current) el.scrollTop = el.scrollHeight
-  }, [filtered.length])
-
-  function handleScroll() {
-    const el = scrollRef.current
-    if (!el) return
-    stickToBottomRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
-  }
+    if (messageCount > 0) bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+  }, [messageCount])
 
   return (
-    <div className="flex h-[calc(100svh-14rem)] min-h-[420px] flex-col sm:h-[calc(100svh-10rem)]">
+    <div className="flex flex-col">
       <div className="flex items-center gap-2 px-1 pb-2">
         {searchOpen ? (
           <input
@@ -119,7 +111,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         </div>
       )}
 
-      <div ref={scrollRef} onScroll={handleScroll} className="no-scrollbar flex-1 overflow-y-auto px-1">
+      <div className="min-h-[50vh] px-1 pb-3">
         {!filtered.length ? (
           <EmptyState
             title={query ? 'Sin resultados' : 'Todavía no hay nada acá'}
@@ -128,9 +120,12 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         ) : (
           <MessageList messages={filtered} onOpenActions={setActiveMessage} />
         )}
+        <div ref={bottomRef} />
       </div>
 
-      <ChatComposer subjectId={subjectId} />
+      <div className="sticky bottom-16 z-10 sm:bottom-0">
+        <ChatComposer subjectId={subjectId} />
+      </div>
       <MessageActionsSheet message={activeMessage} onClose={() => setActiveMessage(null)} />
     </div>
   )
