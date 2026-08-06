@@ -10,6 +10,7 @@ import {
 import type { User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '@/services/supabase/client'
 import { mapProfileRow, type ProfileRow } from '@/services/supabase/mappers'
+import { pullRemoteData } from '@/services/sync/pull'
 import { ADMIN_EMAIL } from '@/lib/constants'
 import type { Profile } from '@/types/auth'
 
@@ -56,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       await loadProfile(nextUser.id)
       setStatus('signed-in')
+      void pullRemoteData(nextUser.id)
     },
     [loadProfile],
   )

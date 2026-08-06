@@ -1,8 +1,12 @@
 import { db } from '../client'
 import { createRepository } from './base'
+import { semesterMapper } from '../../supabase/entityMappers'
 import type { Semester } from '../../../types/domain'
 
-const base = createRepository<Semester>(db.semesters, 'semesters')
+const base = createRepository<Semester>(db.semesters, 'semesters', {
+  tableName: 'semesters',
+  toRow: semesterMapper.toRow,
+})
 
 export const semestersRepo = {
   ...base,

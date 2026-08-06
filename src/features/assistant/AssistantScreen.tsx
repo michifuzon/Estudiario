@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom'
 import { Camera, Send, Sparkles } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/Badge'
-import { aiSettingsRepo, assistantMessagesRepo } from '@/services/db/repositories'
+import { assistantMessagesRepo } from '@/services/db/repositories'
 import { answerLocally } from '@/services/assistant/ruleBasedAssistant'
 import { proposeEventFromInput, type EventProposal } from '@/services/ai/proposeEvent'
+import { useServerAiSettings } from '@/services/ai/useServerAiSettings'
 import { EventProposalCard } from './EventProposalCard'
 import type { AssistantMessage } from '@/types/domain'
 
@@ -18,14 +19,14 @@ const SUGGESTIONS = [
 ]
 
 export function AssistantScreen() {
-  const aiSettings = useLiveQuery(() => aiSettingsRepo.get(), [])
+  const { settings: aiSettings, loading: loadingAiSettings } = useServerAiSettings()
   const turns = useLiveQuery(() => assistantMessagesRepo.list(), [])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const hasProvider = aiSettings && aiSettings.provider !== 'ninguno' && aiSettings.hasKeyConfigured
+  const hasProvider = !loadingAiSettings && aiSettings?.hasKeyConfigured
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })
@@ -137,7 +138,7 @@ export function AssistantScreen() {
         )}
       </div>
 
-      <div className="sticky bottom-16 z-10 mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)] sm:bottom-2">
+      <div className="sticky bottom-[3.25rem] z-10 mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)] sm:bottom-2">
         <input
           ref={fileInputRef}
           type="file"

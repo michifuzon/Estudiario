@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { KeyRound, ShieldCheck } from 'lucide-react'
 import { aiSettingsRepo } from '@/services/db/repositories'
 import { isSupabaseConfigured, supabase } from '@/services/supabase/client'
 import { useAuth } from '@/app/providers/AuthProvider'
+import { useServerAiSettings } from '@/services/ai/useServerAiSettings'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { FieldGroup, Input, Label, Select } from '@/components/ui/Field'
@@ -25,7 +25,7 @@ const MODEL_PLACEHOLDER: Partial<Record<AIProviderKind, string>> = {
 
 export function AIProviderSection() {
   const { isLocalMode } = useAuth()
-  const settings = useLiveQuery(() => aiSettingsRepo.get(), [])
+  const { settings, loading, refetch } = useServerAiSettings()
   const [provider, setProvider] = useState<AIProviderKind>('ninguno')
   const [model, setModel] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -33,7 +33,7 @@ export function AIProviderSection() {
   const [error, setError] = useState<string | null>(null)
   const [savedJustNow, setSavedJustNow] = useState(false)
 
-  if (!settings) return null
+  if (loading) return null
 
   async function handleSave() {
     if (!supabase || provider === 'ninguno' || !apiKey.trim()) return
@@ -47,6 +47,7 @@ export function AIProviderSection() {
       })
       if (rpcError) throw rpcError
       await aiSettingsRepo.update({ provider, model: model.trim(), hasKeyConfigured: true })
+      await refetch()
       setApiKey('')
       setSavedJustNow(true)
       setTimeout(() => setSavedJustNow(false), 3000)
@@ -64,6 +65,7 @@ export function AIProviderSection() {
       const { error: rpcError } = await supabase.rpc('clear_ai_key')
       if (rpcError) throw rpcError
       await aiSettingsRepo.update({ provider: 'ninguno', model: '', hasKeyConfigured: false })
+      await refetch()
       setProvider('ninguno')
       setModel('')
     } finally {
@@ -82,7 +84,7 @@ export function AIProviderSection() {
         para llamar al proveedor que elijas.
       </p>
 
-      {settings.hasKeyConfigured && (
+      {settings?.hasKeyConfigured && (
         <div className="mt-3 flex items-center gap-2 rounded-xl bg-success/10 px-3 py-2.5 text-sm text-ink">
           <ShieldCheck size={16} className="shrink-0 text-success" />
           Tenés una clave de {PROVIDER_LABEL[settings.provider]} guardada
@@ -100,7 +102,7 @@ export function AIProviderSection() {
             : 'Conectá primero un proyecto de Supabase (ver README) para poder guardar tu clave de forma segura.'}
         </p>
       ) : (
-        !settings.hasKeyConfigured && (
+        !settings?.hasKeyConfigured && (
           <div className="mt-4">
             <FieldGroup>
               <Label>Proveedor</Label>

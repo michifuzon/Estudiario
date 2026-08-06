@@ -1,8 +1,12 @@
 import { db } from '../client'
 import { createRepository } from './base'
+import { eventMapper } from '../../supabase/entityMappers'
 import type { EventItem } from '../../../types/domain'
 
-const base = createRepository<EventItem>(db.events, 'events')
+const base = createRepository<EventItem>(db.events, 'events', {
+  tableName: 'events',
+  toRow: eventMapper.toRow,
+})
 
 export const eventsRepo = {
   ...base,

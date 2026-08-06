@@ -1,6 +1,8 @@
 import { db } from '../client'
 import { newBaseRecord, touch } from '../../../lib/record'
 import { queueChange } from '../../sync/outbox'
+import { supabase } from '../../supabase/client'
+import { availabilityMapper } from '../../supabase/entityMappers'
 import type { AvailabilitySettings } from '../../../types/domain'
 
 const SINGLETON_ID = 'default'
@@ -16,6 +18,21 @@ const DEFAULTS: Omit<AvailabilitySettings, keyof ReturnType<typeof newBaseRecord
 
 function defaultRecord(): AvailabilitySettings {
   return { ...newBaseRecord(), id: SINGLETON_ID, ...DEFAULTS }
+}
+
+async function pushRemote(record: AvailabilitySettings) {
+  if (!supabase) return
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  try {
+    await supabase
+      .from('availability')
+      .upsert(availabilityMapper.toRow(record, user.id), { onConflict: 'user_id' })
+  } catch {
+    // se reintenta en la próxima escritura
+  }
 }
 
 export const availabilityRepo = {
@@ -38,6 +55,11 @@ export const availabilityRepo = {
     const updated = touch({ ...current, ...patch })
     await db.availability.put(updated)
     queueChange('availability', SINGLETON_ID, 'upsert')
+    void pushRemote(updated)
     return updated
+  },
+
+  async putLocal(record: AvailabilitySettings): Promise<void> {
+    await db.availability.put({ ...record, id: SINGLETON_ID })
   },
 }
