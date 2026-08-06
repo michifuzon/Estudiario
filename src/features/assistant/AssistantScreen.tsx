@@ -5,7 +5,7 @@ import { Camera, Send, Sparkles } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/Badge'
 import { assistantMessagesRepo } from '@/services/db/repositories'
-import { answerLocally } from '@/services/assistant/ruleBasedAssistant'
+import { answerLocally, HELP_TEXT } from '@/services/assistant/ruleBasedAssistant'
 import { proposeEventFromInput, type EventProposal } from '@/services/ai/proposeEvent'
 import { useServerAiSettings } from '@/services/ai/useServerAiSettings'
 import { EventProposalCard } from './EventProposalCard'
@@ -45,10 +45,7 @@ export function AssistantScreen() {
     }
 
     if (!hasProvider) {
-      await assistantMessagesRepo.add(
-        'assistant',
-        'Todavía no tengo una respuesta preparada para eso sin conectar un proveedor de IA. Podés preguntarme qué estudiar hoy, cuánto falta para un parcial o qué materia priorizar — o cargar tu clave en Configuración para pedidos más flexibles, como agendar un parcial.',
-      )
+      await assistantMessagesRepo.add('assistant', 'No tengo una respuesta preparada para eso exactamente así. ' + HELP_TEXT)
       return
     }
 
