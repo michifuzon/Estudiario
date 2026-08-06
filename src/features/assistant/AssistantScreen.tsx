@@ -16,7 +16,10 @@ const SUGGESTIONS = [
   '¿Qué tengo que estudiar hoy?',
   '¿Cuánto falta para el parcial?',
   '¿Qué materia debería priorizar?',
-  'Agendá un parcial de Física para el viernes',
+  '¿Cuál es mi promedio?',
+  '¿Qué materias tengo?',
+  '¿Cómo viene mi semana?',
+  '¿Qué temas me quedan pendientes?',
 ]
 
 export function AssistantScreen() {
@@ -30,8 +33,14 @@ export function AssistantScreen() {
   const hasProvider = !loadingAiSettings && aiSettings?.hasKeyConfigured
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' })
-  }, [turns?.length])
+    // requestAnimationFrame para que corra después de que el DOM termine de
+    // pintar el turno nuevo (si no, a veces mide el alto viejo y se queda
+    // corto) — así el scroll siempre llega al fondo de verdad.
+    const id = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [turns?.length, busy])
 
   async function handleSend(text?: string) {
     const value = (text ?? input).trim()
@@ -136,17 +145,7 @@ export function AssistantScreen() {
 
       <div className="mt-3 min-h-[40vh]">
         {!turns?.length ? (
-          <div className="flex flex-wrap gap-2">
-            {SUGGESTIONS.map((s) => (
-              <button
-                key={s}
-                onClick={() => void handleSend(s)}
-                className="rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:bg-accent-soft"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          <p className="text-sm text-muted">Tocá una sugerencia de abajo o escribí lo que necesites.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {turns.map((turn) => (
@@ -160,39 +159,53 @@ export function AssistantScreen() {
       </div>
 
       <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 pb-2 sm:static sm:bottom-auto sm:mt-4 sm:px-0 sm:pb-0">
-        <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)]">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              void handlePhoto(e.target.files?.[0] ?? null)
-              if (fileInputRef.current) fileInputRef.current.value = ''
-            }}
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Enviar foto"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent-soft"
-          >
-            <Camera size={18} />
-          </button>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
-            placeholder="Preguntá o pedime que agende algo…"
-            className="flex-1 bg-transparent text-sm focus:outline-none"
-          />
-          <button
-            onClick={() => void handleSend()}
-            disabled={busy}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-50"
-          >
-            <Send size={16} />
-          </button>
+        <div className="mx-auto max-w-2xl">
+          <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto">
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => void handleSend(s)}
+                className="shrink-0 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-[var(--shadow-sm)] hover:bg-accent-soft"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)]">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                void handlePhoto(e.target.files?.[0] ?? null)
+                if (fileInputRef.current) fileInputRef.current.value = ''
+              }}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Enviar foto"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent-soft"
+            >
+              <Camera size={18} />
+            </button>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
+              placeholder="Preguntá algo…"
+              className="flex-1 bg-transparent text-sm focus:outline-none"
+            />
+            <button
+              onClick={() => void handleSend()}
+              disabled={busy}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-50"
+            >
+              <Send size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

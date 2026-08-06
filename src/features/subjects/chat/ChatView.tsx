@@ -58,7 +58,11 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
   }, [subjectId])
 
   useEffect(() => {
-    if (messageCount > 0) bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    if (messageCount === 0) return
+    const id = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(id)
   }, [messageCount])
 
   return (
