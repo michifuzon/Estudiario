@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { Camera, Send, Sparkles } from 'lucide-react'
+import { Camera, Send, Sparkles, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import { assistantMessagesRepo } from '@/services/db/repositories'
 import { answerLocally, HELP_TEXT } from '@/services/assistant/ruleBasedAssistant'
 import { proposeEventFromInput, type EventProposal } from '@/services/ai/proposeEvent'
@@ -67,6 +68,12 @@ export function AssistantScreen() {
     }
   }
 
+  async function handleClearChat() {
+    if (!turns?.length) return
+    if (!window.confirm('¿Borrar todo el historial de esta conversación?')) return
+    await assistantMessagesRepo.clear()
+  }
+
   async function handlePhoto(file: File | null) {
     if (!file) return
     if (!hasProvider) {
@@ -97,10 +104,27 @@ export function AssistantScreen() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col px-4 py-6">
-      <PageHeader icon={<Sparkles size={20} />} title="Asistente" subtitle="Preguntá sobre tus materias, fechas y plan de estudio." />
+      <PageHeader
+        icon={<Sparkles size={20} />}
+        title="Asistente"
+        subtitle="Preguntá sobre tus materias, fechas y plan de estudio."
+        action={
+          !!turns?.length && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void handleClearChat()}
+              aria-label="Limpiar chat"
+            >
+              <Trash2 size={15} />
+              Limpiar
+            </Button>
+          )
+        }
+      />
 
       {!hasProvider && (
-        <div className="mt-4 rounded-xl border border-border bg-surface-raised px-4 py-3 text-sm text-muted">
+        <div className="mt-3 rounded-xl border border-border bg-surface-raised px-4 py-3 text-sm text-muted">
           Estás en modo sin IA paga: respondo lo que puedo calcular con tus propios datos. Para agendar cosas
           por texto o foto, cargá tu propia clave en{' '}
           <Link to="/configuracion" className="text-accent underline">
@@ -110,7 +134,7 @@ export function AssistantScreen() {
         </div>
       )}
 
-      <div className="mt-4 min-h-[40vh]">
+      <div className="mt-3 min-h-[40vh]">
         {!turns?.length ? (
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
