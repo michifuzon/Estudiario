@@ -62,7 +62,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
   }, [messageCount])
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-24 sm:pb-0">
       <div className="flex items-center gap-2 px-1 pb-2">
         {searchOpen ? (
           <input
@@ -123,7 +123,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="sticky bottom-[var(--bottom-nav-h)] z-10 sm:bottom-0">
+      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 sm:static sm:bottom-auto sm:px-0">
         <ChatComposer subjectId={subjectId} />
       </div>
       <MessageActionsSheet message={activeMessage} onClose={() => setActiveMessage(null)} />

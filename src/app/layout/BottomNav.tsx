@@ -5,10 +5,10 @@ import { NAV_ITEMS } from '@/app/nav'
 export function BottomNav() {
   return (
     <nav
-      className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur sm:hidden"
-      style={{ height: 'var(--bottom-nav-h)' }}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 backdrop-blur sm:hidden"
+      style={{ height: 'var(--bottom-nav-total-h)' }}
     >
-      <ul className="flex h-full items-stretch justify-between px-1">
+      <ul className="flex items-stretch justify-between px-1" style={{ height: 'var(--bottom-nav-h)' }}>
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">
             <NavLink

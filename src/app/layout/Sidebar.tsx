@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import clsx from 'clsx'
 import { ShieldCheck, UserRound } from 'lucide-react'
 import { NAV_ITEMS } from '@/app/nav'
@@ -9,10 +9,10 @@ export function Sidebar() {
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col overflow-y-auto border-r border-border/70 bg-surface px-6 pt-[max(env(safe-area-inset-top),3rem)] pb-8 sm:flex">
-      <div className="mb-12 flex items-center gap-3">
+      <Link to="/" className="mb-12 flex items-center gap-3">
         <img src="/logo-mark.png" alt="" className="h-9 w-9 object-contain" />
         <span className="text-lg font-extrabold tracking-tight text-ink">Estudiario</span>
-      </div>
+      </Link>
 
       <ul className="flex flex-col gap-0.5">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (

@@ -103,7 +103,7 @@ export function AssistantScreen() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col px-4 py-6">
+    <div className="mx-auto flex max-w-2xl flex-col px-4 py-6 pb-28 sm:pb-6">
       <PageHeader
         icon={<Sparkles size={20} />}
         title="Asistente"
@@ -159,39 +159,41 @@ export function AssistantScreen() {
         )}
       </div>
 
-      <div className="sticky bottom-[var(--bottom-nav-h)] z-10 mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)] sm:bottom-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={(e) => {
-            void handlePhoto(e.target.files?.[0] ?? null)
-            if (fileInputRef.current) fileInputRef.current.value = ''
-          }}
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          aria-label="Enviar foto"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent-soft"
-        >
-          <Camera size={18} />
-        </button>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
-          placeholder="Preguntá o pedime que agende algo…"
-          className="flex-1 bg-transparent text-sm focus:outline-none"
-        />
-        <button
-          onClick={() => void handleSend()}
-          disabled={busy}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-50"
-        >
-          <Send size={16} />
-        </button>
+      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 pb-2 sm:static sm:bottom-auto sm:mt-4 sm:px-0 sm:pb-0">
+        <div className="mx-auto flex max-w-2xl items-center gap-2 rounded-2xl border border-border bg-surface px-3 py-2.5 shadow-[var(--shadow-md)]">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              void handlePhoto(e.target.files?.[0] ?? null)
+              if (fileInputRef.current) fileInputRef.current.value = ''
+            }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Enviar foto"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-accent-soft"
+          >
+            <Camera size={18} />
+          </button>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
+            placeholder="Preguntá o pedime que agende algo…"
+            className="flex-1 bg-transparent text-sm focus:outline-none"
+          />
+          <button
+            onClick={() => void handleSend()}
+            disabled={busy}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-50"
+          >
+            <Send size={16} />
+          </button>
+        </div>
       </div>
     </div>
   )

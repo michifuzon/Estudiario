@@ -35,10 +35,13 @@
 }
 
 :root {
-  /* alto real de la barra inferior mobile (BottomNav) — cualquier elemento
-     que necesite despegarse de ella (composer del chat, etc.) se alinea
-     contra esta misma variable en vez de estimar un valor aparte. */
+  /* alto del contenido de la barra inferior mobile (BottomNav), sin contar
+     el margen de seguridad del home indicator — eso se suma aparte. */
   --bottom-nav-h: 56px;
+  /* alto total real de la barra (contenido + safe area) — lo que hay que
+     usar para que cualquier otro elemento (el composer del chat, etc.)
+     quede justo pegado arriba de la barra, nunca metido debajo. */
+  --bottom-nav-total-h: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
 
   /* --- superficies: cálidas, nunca blanco ni negro puro --- */
   --paper: #f5f2ec;
