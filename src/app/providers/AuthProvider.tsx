@@ -11,6 +11,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '@/services/supabase/client'
 import { mapProfileRow, type ProfileRow } from '@/services/supabase/mappers'
 import { pullRemoteData } from '@/services/sync/pull'
+import { pushAllLocalData } from '@/services/sync/push'
 import { ADMIN_EMAIL } from '@/lib/constants'
 import type { Profile } from '@/types/auth'
 
@@ -57,7 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       await loadProfile(nextUser.id)
       setStatus('signed-in')
-      void pullRemoteData(nextUser.id)
+      // Primero trae lo que ya está en la nube (por si este es un
+      // dispositivo nuevo o se reinstaló la app), después reenvía
+      // cualquier cosa que haya quedado solo local (por ejemplo, datos
+      // creados antes de que el guardado remoto funcionara bien). Ambos
+      // son upsert por id, así que repetirlo no duplica ni rompe nada.
+      void pullRemoteData(nextUser.id).then(() => pushAllLocalData(nextUser.id))
     },
     [loadProfile],
   )

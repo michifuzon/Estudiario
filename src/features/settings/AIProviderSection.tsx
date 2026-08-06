@@ -20,7 +20,7 @@ const PROVIDER_LABEL: Record<AIProviderKind, string> = {
 const MODEL_PLACEHOLDER: Partial<Record<AIProviderKind, string>> = {
   anthropic: 'claude-sonnet-5',
   openai: 'gpt-5',
-  google: 'gemini-2.5-pro',
+  google: 'gemini-2.0-flash',
 }
 
 export function AIProviderSection() {
