@@ -56,4 +56,10 @@ export const chatRepo = {
   async moveManyToSubject(ids: string[], subjectId: string | null): Promise<void> {
     await Promise.all(ids.map((id) => chatRepo.moveToSubject(id, subjectId)))
   },
+
+  /** Borra todos los mensajes de un chat (subjectId null = bandeja general). */
+  async clearScope(subjectId: string | null): Promise<void> {
+    const scoped = await chatRepo.listByScope(subjectId)
+    await Promise.all(scoped.map((m) => base.remove(m.id)))
+  },
 }

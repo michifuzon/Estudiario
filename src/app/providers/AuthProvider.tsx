@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -24,6 +25,9 @@ interface AuthContextValue {
   isAdmin: boolean
   /** true si no hay Supabase conectado: la app funciona solo en este dispositivo, sin cuentas. */
   isLocalMode: boolean
+  /** true justo después de confirmar el mail y volver a la app — para mostrar un saludo, una sola vez. */
+  justConfirmed: boolean
+  dismissJustConfirmed: () => void
   signUp: (email: string, password: string, displayName: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -37,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>(isSupabaseConfigured ? 'loading' : 'local')
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [justConfirmed, setJustConfirmed] = useState(false)
+  const previousStatusRef = useRef<AuthStatus>(status)
 
   const loadProfile = useCallback(async (userId: string) => {
     if (!supabase) return
@@ -46,18 +52,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const applySession = useCallback(
     async (nextUser: User | null) => {
+      const previousStatus = previousStatusRef.current
       setUser(nextUser)
       if (!nextUser) {
         setProfile(null)
         setStatus('signed-out')
+        previousStatusRef.current = 'signed-out'
         return
       }
       if (!nextUser.email_confirmed_at) {
         setStatus('unverified')
+        previousStatusRef.current = 'unverified'
         return
       }
       await loadProfile(nextUser.id)
       setStatus('signed-in')
+      if (previousStatus === 'unverified') setJustConfirmed(true)
+      previousStatusRef.current = 'signed-in'
       // Primero trae lo que ya está en la nube (por si este es un
       // dispositivo nuevo o se reinstaló la app), después reenvía
       // cualquier cosa que haya quedado solo local (por ejemplo, datos
@@ -87,7 +98,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: { display_name: displayName },
+        // Sin esto, el link del mail de confirmación manda a la Site URL
+        // que tenga configurada el proyecto en Supabase (por defecto,
+        // localhost) en vez de a la app real.
+        emailRedirectTo: window.location.origin,
+      },
     })
     if (error) throw error
   }, [])
@@ -113,6 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadProfile(user.id)
   }, [user, loadProfile])
 
+  const dismissJustConfirmed = useCallback(() => setJustConfirmed(false), [])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
@@ -120,13 +139,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       isAdmin: profile?.email === ADMIN_EMAIL,
       isLocalMode: !isSupabaseConfigured,
+      justConfirmed,
+      dismissJustConfirmed,
       signUp,
       signIn,
       signOut,
       resendVerification,
       refreshProfile,
     }),
-    [status, user, profile, signUp, signIn, signOut, resendVerification, refreshProfile],
+    [status, user, profile, justConfirmed, dismissJustConfirmed, signUp, signIn, signOut, resendVerification, refreshProfile],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

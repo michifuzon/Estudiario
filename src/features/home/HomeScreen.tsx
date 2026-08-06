@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { useHomeData } from './useHomeData'
 import { WeekActivityChart } from './WeekActivityChart'
-import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -96,9 +95,17 @@ export function HomeScreen() {
             {data.todaySessions.map((session) => {
               const subject = data.subjectsById.get(session.subjectId)
               return (
-                <Card key={session.id} className="flex items-center gap-3">
+                <Link
+                  key={session.id}
+                  to={subject ? `/materias/${subject.id}` : '/materias'}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)] hover:border-accent/40"
+                >
                   <button
-                    onClick={() => void sessionsRepo.complete(session.id)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      void sessionsRepo.complete(session.id)
+                    }}
                     aria-label="Marcar como completada"
                     className="shrink-0 text-subtle hover:text-success"
                   >
@@ -115,7 +122,7 @@ export function HomeScreen() {
                     <p className="text-xs text-muted">{session.objective || 'Sesión de estudio'}</p>
                   </div>
                   <span className="shrink-0 text-xs text-subtle">{formatMinutes(session.durationMinutes)}</span>
-                </Card>
+                </Link>
               )
             })}
           </div>
@@ -131,7 +138,11 @@ export function HomeScreen() {
             {data.upcomingEvents.map((event) => {
               const subject = event.subjectId ? data.subjectsById.get(event.subjectId) : undefined
               return (
-                <Card key={event.id} className="flex items-center gap-3">
+                <Link
+                  key={event.id}
+                  to={subject ? `/materias/${subject.id}` : '/calendario'}
+                  className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)] hover:border-accent/40"
+                >
                   <span
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: eventTypeColorVar(event.type) }}
@@ -144,7 +155,7 @@ export function HomeScreen() {
                     <p className="text-xs text-muted">{formatDateLong(event.date)}</p>
                   </div>
                   <Badge tone="accent">{formatDaysUntil(event.date)}</Badge>
-                </Card>
+                </Link>
               )
             })}
           </div>
@@ -156,15 +167,17 @@ export function HomeScreen() {
           <SectionLabel>Materias que necesitan atención</SectionLabel>
           <div className="flex flex-col gap-2">
             {data.subjectsNeedingAttention.map(({ subject, average }) => (
-              <Card key={subject.id}>
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-sm font-medium text-ink">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: subject.color }} />
-                    {subject.name}
-                  </span>
-                  {average !== null && <Badge tone="warning">Promedio {average.toFixed(1)}</Badge>}
-                </div>
-              </Card>
+              <Link
+                key={subject.id}
+                to={`/materias/${subject.id}`}
+                className="flex items-center justify-between rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-sm)] hover:border-accent/40"
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-ink">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: subject.color }} />
+                  {subject.name}
+                </span>
+                {average !== null && <Badge tone="warning">Promedio {average.toFixed(1)}</Badge>}
+              </Link>
             ))}
           </div>
         </section>

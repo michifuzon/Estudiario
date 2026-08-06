@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CalendarClock, Pencil, Sparkles, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { BookOpen, CalendarClock, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -19,6 +20,7 @@ export function EventDetailSheet({
   onClose: () => void
   onEdit: (event: EventItem) => void
 }) {
+  const navigate = useNavigate()
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,9 +69,11 @@ export function EventDetailSheet({
 
       <div className="mb-4 flex flex-wrap gap-2">
         {subject && (
-          <Badge tone="accent" dotColor={subject.color}>
-            {subject.name}
-          </Badge>
+          <button onClick={() => navigate(`/materias/${subject.id}`)}>
+            <Badge tone="accent" dotColor={subject.color}>
+              {subject.name}
+            </Badge>
+          </button>
         )}
         <Badge tone="neutral">{formatDateLong(event.date)}</Badge>
         {event.time && <Badge tone="neutral">{event.time}</Badge>}
@@ -101,6 +105,12 @@ export function EventDetailSheet({
       {error && <p className="mb-3 text-sm text-danger">{error}</p>}
 
       <div className="flex flex-col gap-2">
+        {subject && (
+          <Button variant="secondary" onClick={() => navigate(`/materias/${subject.id}`)}>
+            <BookOpen size={16} />
+            Ver materia
+          </Button>
+        )}
         {canGeneratePlan && !sessions?.length && (
           <Button variant="secondary" onClick={() => void handleGenerate()} disabled={generating}>
             <Sparkles size={16} />

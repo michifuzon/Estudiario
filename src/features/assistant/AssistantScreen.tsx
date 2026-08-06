@@ -112,7 +112,7 @@ export function AssistantScreen() {
   }
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col px-4 py-6 pb-28 sm:pb-6">
+    <div className="mx-auto flex max-w-2xl flex-col px-4 py-6 pb-28 sm:pb-24">
       <PageHeader
         icon={<Sparkles size={20} />}
         title="Asistente"
@@ -158,7 +158,7 @@ export function AssistantScreen() {
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 pb-2 sm:static sm:bottom-auto sm:mt-4 sm:px-0 sm:pb-0">
+      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 pb-2 sm:bottom-4">
         <div className="mx-auto max-w-2xl">
           <div className="no-scrollbar mb-2 flex gap-1.5 overflow-x-auto">
             {SUGGESTIONS.map((s) => (

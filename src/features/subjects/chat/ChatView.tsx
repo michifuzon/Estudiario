@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { format, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Pin, Search } from 'lucide-react'
+import { Pin, Search, Trash2 } from 'lucide-react'
 import clsx from 'clsx'
 import { chatRepo } from '@/services/db/repositories'
 import type { ChatMessage, ChatMessageType } from '@/types/domain'
@@ -65,8 +65,14 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
     return () => cancelAnimationFrame(id)
   }, [messageCount])
 
+  async function handleClearChat() {
+    if (!messages?.length) return
+    if (!window.confirm('¿Borrar todos los mensajes de este chat? Esto no borra los archivos guardados en la materia.')) return
+    await chatRepo.clearScope(subjectId)
+  }
+
   return (
-    <div className="flex flex-col pb-24 sm:pb-0">
+    <div className="flex flex-col pb-24 sm:pb-20">
       <div className="flex items-center gap-2 px-1 pb-2">
         {searchOpen ? (
           <input
@@ -93,9 +99,18 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
                 </button>
               ))}
             </div>
-            <button onClick={() => setSearchOpen(true)} className="shrink-0 rounded-full p-1.5 text-muted hover:bg-accent-soft">
+            <button onClick={() => setSearchOpen(true)} className="shrink-0 rounded-full p-1.5 text-muted hover:bg-accent-soft" aria-label="Buscar">
               <Search size={17} />
             </button>
+            {!!messages?.length && (
+              <button
+                onClick={() => void handleClearChat()}
+                className="shrink-0 rounded-full p-1.5 text-muted hover:bg-danger/10 hover:text-danger"
+                aria-label="Limpiar chat"
+              >
+                <Trash2 size={17} />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -127,7 +142,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 sm:static sm:bottom-auto sm:px-0">
+      <div className="fixed inset-x-0 bottom-[var(--bottom-nav-total-h)] z-10 px-4 sm:bottom-4">
         <ChatComposer subjectId={subjectId} />
       </div>
       <MessageActionsSheet message={activeMessage} onClose={() => setActiveMessage(null)} />
