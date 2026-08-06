@@ -22,11 +22,17 @@ function roundedSquareBg(size, radius) {
   )
 }
 
-// El PNG original tiene bastante aire/glow alrededor del motivo. Lo recortamos
-// al área con contenido real antes de escalar, así el ícono aprovecha todo el
-// tamaño disponible y no se ve "perdido" ni borroso a 16–32px.
+// El PNG original tiene un glow suave y asimétrico alrededor del motivo:
+// un trim() automático por alfa agarra ese glow de forma dispareja y el
+// resultado queda descentrado. Recortamos a mano un cuadrado centrado en el
+// contenido realmente opaco (bordes con alfa > 200), con un margen parejo.
 async function trimmedMark() {
-  return sharp(source).trim({ threshold: 12 }).toBuffer()
+  const CENTER_X = 502
+  const CENTER_Y = 486
+  const HALF = 290
+  return sharp(source)
+    .extract({ left: CENTER_X - HALF, top: CENTER_Y - HALF, width: HALF * 2, height: HALF * 2 })
+    .toBuffer()
 }
 
 async function iconOnBrandBg(size, markScale) {

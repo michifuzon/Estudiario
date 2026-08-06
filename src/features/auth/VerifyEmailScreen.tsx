@@ -19,7 +19,7 @@ export function VerifyEmailScreen() {
   }
 
   return (
-    <div className="safe-top safe-bottom flex min-h-full flex-col items-center justify-center gap-4 bg-paper px-6 py-10 text-center">
+    <div className="flex min-h-full flex-col items-center justify-center gap-4 bg-paper px-6 pt-[max(env(safe-area-inset-top),2.5rem)] pb-[max(env(safe-area-inset-bottom),2.5rem)] text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent-soft text-accent-ink">
         <MailCheck size={26} />
       </div>

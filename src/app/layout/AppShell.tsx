@@ -6,11 +6,11 @@ import { QuickCaptureSheet } from '@/features/capture/QuickCaptureSheet'
 
 export function AppShell() {
   return (
-    <div className="flex min-h-svh bg-paper">
+    <div className="flex h-svh overflow-hidden bg-paper">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <MobileTopBar />
-        <main className="mx-auto w-full flex-1 pb-24 sm:pb-8">
+        <main className="mx-auto w-full flex-1 overflow-y-auto pb-24 sm:pb-8">
           <Outlet />
         </main>
       </div>

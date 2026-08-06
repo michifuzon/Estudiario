@@ -41,7 +41,7 @@ export function ChatComposer({ subjectId }: { subjectId: string | null }) {
 
   if (recorder.status !== 'idle') {
     return (
-      <div className="safe-bottom flex items-center gap-3 border-t border-border bg-surface px-4 py-3">
+      <div className="flex items-center gap-3 border-t border-border bg-surface px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
         <span className="flex-1 text-sm text-muted">
           {recorder.status === 'recording'
             ? `Grabando… ${Math.floor(recorder.durationMs / 1000)}s`
@@ -73,7 +73,7 @@ export function ChatComposer({ subjectId }: { subjectId: string | null }) {
   }
 
   return (
-    <div className="safe-bottom flex items-end gap-2 border-t border-border bg-surface px-3 py-2.5">
+    <div className="flex items-end gap-2 border-t border-border bg-surface px-3 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.625rem)]">
       <input
         ref={photoInputRef}
         type="file"

@@ -102,7 +102,7 @@ export function AuthScreen() {
 
 function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="safe-top safe-bottom flex min-h-full flex-col items-center justify-center bg-paper px-6 py-10">
+    <div className="flex min-h-full flex-col items-center justify-center bg-paper px-6 pt-[max(env(safe-area-inset-top),2.5rem)] pb-[max(env(safe-area-inset-bottom),2.5rem)]">
       <div className="animate-fade-in mb-8 flex flex-col items-center gap-3">
         <img src="/estudiarioimg1.png" alt="" className="h-20 w-20 object-contain" />
         <h1 className="text-2xl font-bold tracking-tight">Estudiario</h1>
