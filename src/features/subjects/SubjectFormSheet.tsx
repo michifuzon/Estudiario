@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { Button } from '@/components/ui/Button'
 import { FieldGroup, Input, Label, Select, Textarea } from '@/components/ui/Field'
@@ -31,27 +31,29 @@ export function SubjectFormSheet({
   onDeleted?: () => void
 }) {
   const [name, setName] = useState('')
+  const [color, setColor] = useState(COLOR_PRESETS[0])
+  const [difficulty, setDifficulty] = useState<Difficulty>(2)
   const [professors, setProfessors] = useState<string[]>([])
   const [schedule, setSchedule] = useState('')
   const [location, setLocation] = useState('')
-  const [color, setColor] = useState(COLOR_PRESETS[0])
   const [description, setDescription] = useState('')
-  const [difficulty, setDifficulty] = useState<Difficulty>(2)
   const [weeklyHoursTarget, setWeeklyHoursTarget] = useState(3)
   const [status, setStatus] = useState<SubjectStatus>('cursando')
   const [submitting, setSubmitting] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
 
   useEffect(() => {
     if (!open) return
     setName(subject?.name ?? '')
+    setColor(subject?.color ?? COLOR_PRESETS[0])
+    setDifficulty(subject?.difficulty ?? 2)
     setProfessors(subject?.professors ?? [])
     setSchedule(subject?.schedule ?? '')
     setLocation(subject?.location ?? '')
-    setColor(subject?.color ?? COLOR_PRESETS[0])
     setDescription(subject?.description ?? '')
-    setDifficulty(subject?.difficulty ?? 2)
     setWeeklyHoursTarget(subject?.weeklyHoursTarget ?? 3)
     setStatus(subject?.status ?? 'cursando')
+    setShowDetails(false)
   }, [open, subject])
 
   const [deleting, setDeleting] = useState(false)
@@ -125,58 +127,70 @@ export function SubjectFormSheet({
       </FieldGroup>
 
       <FieldGroup>
-        <Label>Profesores/as</Label>
-        <TagInput values={professors} onChange={setProfessors} placeholder="Escribí un nombre y Enter" />
-      </FieldGroup>
-
-      <FieldGroup>
-        <Label>Aula / modalidad</Label>
-        <Input value={location} onChange={(e) => setLocation(e.target.value)} />
-      </FieldGroup>
-
-      <FieldGroup>
-        <Label>Horarios de cursado</Label>
-        <Input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder="Lun y Mié 18–20h" />
-      </FieldGroup>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FieldGroup>
-          <Label>Dificultad</Label>
-          <Select value={difficulty} onChange={(e) => setDifficulty(Number(e.target.value) as Difficulty)}>
-            {([1, 2, 3, 4] as Difficulty[]).map((d) => (
-              <option key={d} value={d}>
-                {DIFFICULTY_LABEL[d]}
-              </option>
-            ))}
-          </Select>
-        </FieldGroup>
-        <FieldGroup>
-          <Label>Horas semanales</Label>
-          <Input
-            type="number"
-            min={0}
-            step={0.5}
-            value={weeklyHoursTarget}
-            onChange={(e) => setWeeklyHoursTarget(Number(e.target.value))}
-          />
-        </FieldGroup>
-      </div>
-
-      <FieldGroup>
-        <Label>Estado</Label>
-        <Select value={status} onChange={(e) => setStatus(e.target.value as SubjectStatus)}>
-          {Object.entries(SUBJECT_STATUS_LABEL).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
+        <Label>Dificultad</Label>
+        <Select value={difficulty} onChange={(e) => setDifficulty(Number(e.target.value) as Difficulty)}>
+          {([1, 2, 3, 4] as Difficulty[]).map((d) => (
+            <option key={d} value={d}>
+              {DIFFICULTY_LABEL[d]}
             </option>
           ))}
         </Select>
+        <p className="mt-1 text-xs text-subtle">Esto es lo que más pesa a la hora de armarte el plan de estudio.</p>
       </FieldGroup>
 
-      <FieldGroup>
-        <Label>Descripción</Label>
-        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-      </FieldGroup>
+      <button
+        onClick={() => setShowDetails((v) => !v)}
+        className="mb-4 flex w-full items-center justify-between rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface-raised"
+      >
+        Más detalles (opcional)
+        {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+
+      {showDetails && (
+        <>
+          <FieldGroup>
+            <Label>Profesores/as</Label>
+            <TagInput values={professors} onChange={setProfessors} placeholder="Escribí un nombre y Enter" />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Aula / modalidad</Label>
+            <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Horarios de cursado</Label>
+            <Input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder="Lun y Mié 18–20h" />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Horas semanales</Label>
+            <Input
+              type="number"
+              min={0}
+              step={0.5}
+              value={weeklyHoursTarget}
+              onChange={(e) => setWeeklyHoursTarget(Number(e.target.value))}
+            />
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Estado</Label>
+            <Select value={status} onChange={(e) => setStatus(e.target.value as SubjectStatus)}>
+              {Object.entries(SUBJECT_STATUS_LABEL).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </FieldGroup>
+
+          <FieldGroup>
+            <Label>Descripción</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+          </FieldGroup>
+        </>
+      )}
 
       <Button className="w-full" disabled={!name.trim() || submitting} onClick={() => void handleSubmit()}>
         {submitting ? 'Guardando…' : subject ? 'Guardar cambios' : 'Crear materia'}

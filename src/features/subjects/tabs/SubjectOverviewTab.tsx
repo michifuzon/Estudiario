@@ -3,10 +3,12 @@ import { formatISO } from 'date-fns'
 import { useSubjectContext } from '../context'
 import { eventsRepo, gradesRepo } from '@/services/db/repositories'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { computeAverage } from '@/lib/grades'
 import { formatDateLong, formatDaysUntil } from '@/lib/format'
-import { EVENT_TYPE_LABEL } from '@/types/domain'
+import { difficultyColorVar } from '@/lib/domain-ui'
+import { DIFFICULTY_LABEL, EVENT_TYPE_LABEL } from '@/types/domain'
 
 export function SubjectOverviewTab() {
   const { subject } = useSubjectContext()
@@ -17,16 +19,30 @@ export function SubjectOverviewTab() {
   const grades = useLiveQuery(() => gradesRepo.listBySubject(subject.id), [subject.id])
   const average = grades ? computeAverage(grades) : null
 
+  const extras = [
+    subject.professors.length && {
+      label: subject.professors.length > 1 ? 'Profesores/as' : 'Profesor/a',
+      value: subject.professors.join(', '),
+    },
+    subject.location && { label: 'Aula / modalidad', value: subject.location },
+    subject.schedule && { label: 'Horario', value: subject.schedule },
+  ].filter(Boolean) as { label: string; value: string }[]
+
   return (
     <div className="flex flex-col gap-4">
       {subject.description && <p className="text-sm text-muted">{subject.description}</p>}
 
-      <div className="grid grid-cols-2 gap-3">
-        <InfoCard label={subject.professors.length > 1 ? 'Profesores/as' : 'Profesor/a'} value={subject.professors.length ? subject.professors.join(', ') : '—'} />
-        <InfoCard label="Aula / modalidad" value={subject.location || '—'} />
-        <InfoCard label="Horario" value={subject.schedule || '—'} />
-        <InfoCard label="Horas semanales" value={`${subject.weeklyHoursTarget} h`} />
-      </div>
+      <Badge dotColor={difficultyColorVar(subject.difficulty)} className="w-fit">
+        Dificultad: {DIFFICULTY_LABEL[subject.difficulty]}
+      </Badge>
+
+      {!!extras.length && (
+        <div className="grid grid-cols-2 gap-3">
+          {extras.map((e) => (
+            <InfoCard key={e.label} label={e.label} value={e.value} />
+          ))}
+        </div>
+      )}
 
       <Card>
         <p className="text-sm font-medium text-ink">Promedio</p>
