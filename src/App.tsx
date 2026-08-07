@@ -14,6 +14,7 @@ import { SubjectGradesTab } from '@/features/subjects/tabs/SubjectGradesTab'
 import { SubjectPlanTab } from '@/features/subjects/tabs/SubjectPlanTab'
 import { InboxScreen } from '@/features/subjects/InboxScreen'
 import { PlannerScreen } from '@/features/planner/PlannerScreen'
+import { PomodoroScreen } from '@/features/pomodoro/PomodoroScreen'
 import { AssistantScreen } from '@/features/assistant/AssistantScreen'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
 import { AdminScreen } from '@/features/admin/AdminScreen'
@@ -38,6 +39,7 @@ export default function App() {
                 </Route>
                 <Route path="bandeja" element={<InboxScreen />} />
                 <Route path="plan" element={<PlannerScreen />} />
+                <Route path="pomodoro" element={<PomodoroScreen />} />
                 <Route path="asistente" element={<AssistantScreen />} />
                 <Route path="configuracion" element={<SettingsScreen />} />
                 <Route path="admin" element={<AdminScreen />} />

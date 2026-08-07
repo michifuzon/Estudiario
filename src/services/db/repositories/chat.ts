@@ -1,8 +1,12 @@
 import { db } from '../client'
 import { createRepository } from './base'
+import { chatMessageMapper } from '../../supabase/entityMappers'
 import type { ChatMessage, ChatMessageStatus } from '../../../types/domain'
 
-const base = createRepository<ChatMessage>(db.chatMessages, 'chatMessages')
+const base = createRepository<ChatMessage>(db.chatMessages, 'chatMessages', {
+  tableName: 'chat_messages',
+  toRow: chatMessageMapper.toRow,
+})
 
 export const chatRepo = {
   ...base,

@@ -146,11 +146,22 @@ export interface AvailabilityException {
   note: string
 }
 
+/** Con cuántos días de anticipación empezar a estudiar cada materia, según su dificultad. */
+export type AnticipationByDifficulty = Record<Difficulty, number>
+
+export const DEFAULT_ANTICIPATION_DAYS: AnticipationByDifficulty = {
+  1: 5,
+  2: 10,
+  3: 15,
+  4: 21,
+}
+
 export interface AvailabilitySettings extends BaseRecord {
   maxDailyMinutes: number
   preferredSessionMinutes: number
   breakMinutes: number
   timeOfDayPreference: 'mañana' | 'tarde' | 'noche' | 'indistinto'
+  anticipationDaysByDifficulty: AnticipationByDifficulty
   weeklySlots: WeeklyAvailabilitySlot[]
   exceptions: AvailabilityException[]
 }

@@ -4,6 +4,7 @@ import { Sheet } from '@/components/ui/Sheet'
 import { Button } from '@/components/ui/Button'
 import { FieldGroup, Input, Label, Select, Textarea } from '@/components/ui/Field'
 import { TagInput } from '@/components/ui/TagInput'
+import { useConfirmDialog } from '@/components/ui/useConfirmDialog'
 import { semestersRepo, subjectsRepo } from '@/services/db/repositories'
 import { DIFFICULTY_LABEL, type Difficulty, type Subject, type SubjectStatus } from '@/types/domain'
 import { SUBJECT_STATUS_LABEL } from '@/lib/domain-ui'
@@ -57,12 +58,15 @@ export function SubjectFormSheet({
   }, [open, subject])
 
   const [deleting, setDeleting] = useState(false)
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   async function handleDelete() {
     if (!subject) return
-    if (!window.confirm(`Eliminar "${subject.name}" y todo lo que tiene guardado (chat, archivos, calificaciones, plan)?`)) {
-      return
-    }
+    const ok = await confirm({
+      title: `¿Eliminar "${subject.name}"?`,
+      description: 'Se borra todo lo que tiene guardado: chat, archivos, calificaciones y plan.',
+    })
+    if (!ok) return
     setDeleting(true)
     try {
       await subjectsRepo.remove(subject.id)
@@ -101,6 +105,7 @@ export function SubjectFormSheet({
   }
 
   return (
+    <>
     <Sheet open={open} onClose={onClose} title={subject ? 'Editar materia' : 'Nueva materia'}>
       <FieldGroup>
         <Label>Nombre</Label>
@@ -207,5 +212,7 @@ export function SubjectFormSheet({
         </button>
       )}
     </Sheet>
+      {confirmDialog}
+    </>
   )
 }

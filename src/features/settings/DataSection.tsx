@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { useConfirmDialog } from '@/components/ui/useConfirmDialog'
 import { clearAllData, exportAllData } from '@/services/db/exportImport'
 
 export function DataSection() {
   const [deleting, setDeleting] = useState(false)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function handleExport() {
     const blob = await exportAllData()
@@ -17,7 +19,11 @@ export function DataSection() {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Esto borra todos tus datos guardados en este dispositivo. ¿Confirmás?')) return
+    const ok = await confirm({
+      title: '¿Borrar todos tus datos?',
+      description: 'Esto borra todo lo guardado en este dispositivo. No se puede deshacer.',
+    })
+    if (!ok) return
     setDeleting(true)
     try {
       await clearAllData()
@@ -41,6 +47,7 @@ export function DataSection() {
           {deleting ? 'Borrando…' : 'Borrar todo'}
         </Button>
       </div>
+      {dialog}
     </Card>
   )
 }

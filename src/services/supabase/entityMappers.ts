@@ -4,12 +4,14 @@
 // escrituras contra Supabase — ver services/db/repositories/base.ts.
 import type {
   AvailabilitySettings,
+  ChatMessage,
   EventItem,
   Grade,
   Semester,
   StudySession,
   Subject,
 } from '@/types/domain'
+import { DEFAULT_ANTICIPATION_DAYS } from '@/types/domain'
 
 export const semesterMapper = {
   toRow: (r: Semester, userId: string) => ({
@@ -196,6 +198,7 @@ export const availabilityMapper = {
     preferred_session_minutes: r.preferredSessionMinutes,
     break_minutes: r.breakMinutes,
     time_of_day_preference: r.timeOfDayPreference,
+    anticipation_days_by_difficulty: r.anticipationDaysByDifficulty,
     weekly_slots: r.weeklySlots,
     exceptions: r.exceptions,
     created_at: r.createdAt,
@@ -208,8 +211,45 @@ export const availabilityMapper = {
     preferredSessionMinutes: row.preferred_session_minutes,
     breakMinutes: row.break_minutes,
     timeOfDayPreference: row.time_of_day_preference,
+    anticipationDaysByDifficulty: { ...DEFAULT_ANTICIPATION_DAYS, ...row.anticipation_days_by_difficulty },
     weeklySlots: row.weekly_slots ?? [],
     exceptions: row.exceptions ?? [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    deletedAt: row.deleted_at,
+  }),
+}
+
+export const chatMessageMapper = {
+  toRow: (r: ChatMessage, userId: string) => ({
+    id: r.id,
+    user_id: userId,
+    subject_id: r.subjectId,
+    type: r.type,
+    text: r.text,
+    status: r.status,
+    pinned: r.pinned,
+    tags: r.tags,
+    reply_to_id: r.replyToId,
+    linked_event_id: r.linkedEventId,
+    linked_session_id: r.linkedSessionId,
+    unit: r.unit,
+    created_at: r.createdAt,
+    updated_at: r.updatedAt,
+    deleted_at: r.deletedAt,
+  }),
+  fromRow: (row: any): ChatMessage => ({
+    id: row.id,
+    subjectId: row.subject_id,
+    type: row.type,
+    text: row.text,
+    status: row.status,
+    pinned: row.pinned,
+    tags: row.tags ?? [],
+    replyToId: row.reply_to_id,
+    linkedEventId: row.linked_event_id,
+    linkedSessionId: row.linked_session_id,
+    unit: row.unit,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,

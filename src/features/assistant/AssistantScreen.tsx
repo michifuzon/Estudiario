@@ -5,6 +5,7 @@ import { Camera, Send, Sparkles, Trash2 } from 'lucide-react'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { useConfirmDialog } from '@/components/ui/useConfirmDialog'
 import { assistantMessagesRepo } from '@/services/db/repositories'
 import { answerLocally, HELP_TEXT } from '@/services/assistant/ruleBasedAssistant'
 import { proposeEventFromInput, type EventProposal } from '@/services/ai/proposeEvent'
@@ -77,9 +78,12 @@ export function AssistantScreen() {
     }
   }
 
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
   async function handleClearChat() {
     if (!turns?.length) return
-    if (!window.confirm('¿Borrar todo el historial de esta conversación?')) return
+    const ok = await confirm({ title: '¿Borrar todo el historial?', description: 'Se borra toda esta conversación con el Asistente.' })
+    if (!ok) return
     await assistantMessagesRepo.clear()
   }
 
@@ -208,6 +212,7 @@ export function AssistantScreen() {
           </div>
         </div>
       </div>
+      {confirmDialog}
     </div>
   )
 }

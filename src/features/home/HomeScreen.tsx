@@ -12,6 +12,7 @@ import {
   Inbox,
   NotebookPen,
   NotebookText,
+  Timer,
 } from 'lucide-react'
 import { useHomeData } from './useHomeData'
 import { WeekActivityChart } from './WeekActivityChart'
@@ -68,6 +69,7 @@ export function HomeScreen() {
         <QuickAction to="/calendario" icon={<CalendarPlus size={17} />} label="Evento" tone="delivery" />
         <QuickAction onClick={openCapture} icon={<Camera size={17} />} label="Captura" tone="warning" />
         <QuickAction to="/bandeja" icon={<Inbox size={17} />} label="Bandeja" tone="neutral" />
+        <QuickAction to="/pomodoro" icon={<Timer size={17} />} label="Pomodoro" tone="delivery" />
       </div>
 
       {!!data?.pendingReviewCount && (

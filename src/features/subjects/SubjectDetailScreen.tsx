@@ -4,9 +4,6 @@ import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { ChevronLeft, Pencil } from 'lucide-react'
 import { subjectsRepo } from '@/services/db/repositories'
-import { DIFFICULTY_LABEL } from '@/types/domain'
-import { SUBJECT_STATUS_LABEL, difficultyColorVar } from '@/lib/domain-ui'
-import { Badge } from '@/components/ui/Badge'
 import { SubjectFormSheet } from './SubjectFormSheet'
 
 const TABS = [
@@ -40,10 +37,6 @@ export function SubjectDetailScreen() {
           <button onClick={() => setEditOpen(true)} className="rounded-full p-1.5 text-muted hover:bg-accent-soft">
             <Pencil size={18} />
           </button>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-2 pl-8">
-          <Badge dotColor={difficultyColorVar(subject.difficulty)}>{DIFFICULTY_LABEL[subject.difficulty]}</Badge>
-          <Badge tone="neutral">{SUBJECT_STATUS_LABEL[subject.status]}</Badge>
         </div>
 
         <div className="no-scrollbar mt-4 flex gap-1 overflow-x-auto">

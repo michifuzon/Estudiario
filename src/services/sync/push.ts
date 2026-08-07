@@ -6,6 +6,7 @@ import {
   sessionMapper,
   gradeMapper,
   availabilityMapper,
+  chatMessageMapper,
 } from '../supabase/entityMappers'
 import {
   semestersRepo,
@@ -14,6 +15,7 @@ import {
   sessionsRepo,
   gradesRepo,
   availabilityRepo,
+  chatRepo,
 } from '../db/repositories'
 
 /**
@@ -57,6 +59,12 @@ export async function pushAllLocalData(userId: string): Promise<{ pushed: number
   const grades = await gradesRepo.list()
   for (const g of grades) {
     const { error } = await supabase.from('grades').upsert(gradeMapper.toRow(g, userId))
+    error ? failed++ : pushed++
+  }
+
+  const chatMessages = await chatRepo.list()
+  for (const m of chatMessages) {
+    const { error } = await supabase.from('chat_messages').upsert(chatMessageMapper.toRow(m, userId))
     error ? failed++ : pushed++
   }
 

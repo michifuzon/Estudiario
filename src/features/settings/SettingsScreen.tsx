@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { ProfileSection } from './ProfileSection'
 import { AvailabilitySection } from './AvailabilitySection'
-import { PomodoroSection } from './PomodoroSection'
+import { PlanPreferencesSection } from './PlanPreferencesSection'
 import { SemestersSection } from './SemestersSection'
 import { AIProviderSection } from './AIProviderSection'
 import { DemoDataSection } from './DemoDataSection'
@@ -25,7 +25,7 @@ export function SettingsScreen() {
         <SyncStatusSection />
         <ProfileSection />
         <AvailabilitySection />
-        <PomodoroSection />
+        <PlanPreferencesSection />
         <SemestersSection />
         <AIProviderSection />
         <DemoDataSection />

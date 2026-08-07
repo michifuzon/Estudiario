@@ -6,6 +6,7 @@ import {
   sessionMapper,
   gradeMapper,
   availabilityMapper,
+  chatMessageMapper,
 } from '../supabase/entityMappers'
 import {
   semestersRepo,
@@ -14,6 +15,7 @@ import {
   sessionsRepo,
   gradesRepo,
   availabilityRepo,
+  chatRepo,
 } from '../db/repositories'
 
 /**
@@ -25,13 +27,14 @@ import {
 export async function pullRemoteData(userId: string): Promise<void> {
   if (!supabase) return
 
-  const [semesters, subjects, events, sessions, grades, availability] = await Promise.all([
+  const [semesters, subjects, events, sessions, grades, availability, chatMessages] = await Promise.all([
     supabase.from('semesters').select('*').eq('user_id', userId),
     supabase.from('subjects').select('*').eq('user_id', userId),
     supabase.from('events').select('*').eq('user_id', userId),
     supabase.from('study_sessions').select('*').eq('user_id', userId),
     supabase.from('grades').select('*').eq('user_id', userId),
     supabase.from('availability').select('*').eq('user_id', userId).maybeSingle(),
+    supabase.from('chat_messages').select('*').eq('user_id', userId),
   ])
 
   await Promise.all([
@@ -40,6 +43,7 @@ export async function pullRemoteData(userId: string): Promise<void> {
     ...(events.data ?? []).map((row) => eventsRepo.putLocal(eventMapper.fromRow(row))),
     ...(sessions.data ?? []).map((row) => sessionsRepo.putLocal(sessionMapper.fromRow(row))),
     ...(grades.data ?? []).map((row) => gradesRepo.putLocal(gradeMapper.fromRow(row))),
+    ...(chatMessages.data ?? []).map((row) => chatRepo.putLocal(chatMessageMapper.fromRow(row))),
   ])
 
   if (availability.data) {

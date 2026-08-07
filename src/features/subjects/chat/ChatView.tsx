@@ -10,6 +10,7 @@ import { ChatMessageBubble } from './ChatMessageBubble'
 import { ChatComposer } from './ChatComposer'
 import { MessageActionsSheet } from './MessageActionsSheet'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useConfirmDialog } from '@/components/ui/useConfirmDialog'
 
 type Filter = 'todos' | 'pendientes' | 'importantes' | ChatMessageType
 
@@ -65,9 +66,15 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
     return () => cancelAnimationFrame(id)
   }, [messageCount])
 
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
+
   async function handleClearChat() {
     if (!messages?.length) return
-    if (!window.confirm('¿Borrar todos los mensajes de este chat? Esto no borra los archivos guardados en la materia.')) return
+    const ok = await confirm({
+      title: '¿Borrar todos los mensajes?',
+      description: 'Esto no borra los archivos guardados en la materia, solo el chat.',
+    })
+    if (!ok) return
     await chatRepo.clearScope(subjectId)
   }
 
@@ -146,6 +153,7 @@ export function ChatView({ subjectId }: { subjectId: string | null }) {
         <ChatComposer subjectId={subjectId} />
       </div>
       <MessageActionsSheet message={activeMessage} onClose={() => setActiveMessage(null)} />
+      {confirmDialog}
     </div>
   )
 }

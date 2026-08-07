@@ -100,7 +100,16 @@ export function generateStudyPlanForEvent(params: GeneratePlanParams): SessionDr
   const today = params.today ?? new Date()
   const examDate = new Date(`${params.event.date}T00:00:00`)
   const daysUntilExam = Math.max(differenceInCalendarDays(examDate, today), 1)
-  const availableDays = Math.max(daysUntilExam - 1, 1)
+
+  // Con cuántos días de anticipación arrancar a estudiar esta materia según
+  // su dificultad (configurable en Ajustes → Plan de estudio). Si el examen
+  // está más cerca que eso, usamos lo que realmente queda; nunca inventamos
+  // días que no existen.
+  const anticipationDays = params.availability.anticipationDaysByDifficulty?.[params.subject.difficulty] ?? 14
+  const availableDays = Math.max(Math.min(daysUntilExam - 1, anticipationDays), 1)
+  const windowStartOffset = daysUntilExam - availableDays
+  const windowEndOffset = daysUntilExam - 1
+  const windowSpan = Math.max(windowEndOffset - windowStartOffset, 0)
 
   const topicsCount = params.event.topics.split(/[,;\n]/).filter((t) => t.trim()).length
 
@@ -124,8 +133,8 @@ export function generateStudyPlanForEvent(params: GeneratePlanParams): SessionDr
   return objectives.map((item, index) => {
     const dayOffset =
       index === objectives.length - 1
-        ? availableDays
-        : Math.max(1, Math.round(((index + 1) * availableDays) / objectives.length))
+        ? windowEndOffset
+        : windowStartOffset + Math.max(0, Math.round(((index + 1) * windowSpan) / objectives.length))
     return {
       topic: item.topic,
       objective: item.objective,
