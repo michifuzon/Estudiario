@@ -48,7 +48,7 @@ export interface Semester extends BaseRecord {
 export interface Subject extends BaseRecord {
   semesterId: ID
   name: string
-  professor: string
+  professors: string[]
   schedule: string
   location: string
   color: string

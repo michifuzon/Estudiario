@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react'
 import { Sheet } from '@/components/ui/Sheet'
 import { Button } from '@/components/ui/Button'
 import { FieldGroup, Input, Label, Select, Textarea } from '@/components/ui/Field'
+import { TagInput } from '@/components/ui/TagInput'
 import { semestersRepo, subjectsRepo } from '@/services/db/repositories'
 import { DIFFICULTY_LABEL, type Difficulty, type Subject, type SubjectStatus } from '@/types/domain'
 import { SUBJECT_STATUS_LABEL } from '@/lib/domain-ui'
@@ -30,7 +31,7 @@ export function SubjectFormSheet({
   onDeleted?: () => void
 }) {
   const [name, setName] = useState('')
-  const [professor, setProfessor] = useState('')
+  const [professors, setProfessors] = useState<string[]>([])
   const [schedule, setSchedule] = useState('')
   const [location, setLocation] = useState('')
   const [color, setColor] = useState(COLOR_PRESETS[0])
@@ -43,7 +44,7 @@ export function SubjectFormSheet({
   useEffect(() => {
     if (!open) return
     setName(subject?.name ?? '')
-    setProfessor(subject?.professor ?? '')
+    setProfessors(subject?.professors ?? [])
     setSchedule(subject?.schedule ?? '')
     setLocation(subject?.location ?? '')
     setColor(subject?.color ?? COLOR_PRESETS[0])
@@ -76,7 +77,7 @@ export function SubjectFormSheet({
     try {
       const payload = {
         name: name.trim(),
-        professor,
+        professors,
         schedule,
         location,
         color,
@@ -123,16 +124,15 @@ export function SubjectFormSheet({
         </div>
       </FieldGroup>
 
-      <div className="grid grid-cols-2 gap-3">
-        <FieldGroup>
-          <Label>Profesor/a</Label>
-          <Input value={professor} onChange={(e) => setProfessor(e.target.value)} />
-        </FieldGroup>
-        <FieldGroup>
-          <Label>Aula / modalidad</Label>
-          <Input value={location} onChange={(e) => setLocation(e.target.value)} />
-        </FieldGroup>
-      </div>
+      <FieldGroup>
+        <Label>Profesores/as</Label>
+        <TagInput values={professors} onChange={setProfessors} placeholder="Escribí un nombre y Enter" />
+      </FieldGroup>
+
+      <FieldGroup>
+        <Label>Aula / modalidad</Label>
+        <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+      </FieldGroup>
 
       <FieldGroup>
         <Label>Horarios de cursado</Label>

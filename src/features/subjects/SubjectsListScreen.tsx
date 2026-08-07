@@ -44,7 +44,7 @@ export function SubjectsListScreen() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-ink">{subject.name}</p>
                 <p className="truncate text-sm text-muted">
-                  {subject.professor || 'Sin profesor asignado'}
+                  {subject.professors.length ? subject.professors.join(', ') : 'Sin profesor asignado'}
                   {subject.schedule ? ` · ${subject.schedule}` : ''}
                 </p>
               </div>

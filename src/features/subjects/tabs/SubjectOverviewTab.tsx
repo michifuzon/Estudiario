@@ -22,7 +22,7 @@ export function SubjectOverviewTab() {
       {subject.description && <p className="text-sm text-muted">{subject.description}</p>}
 
       <div className="grid grid-cols-2 gap-3">
-        <InfoCard label="Profesor/a" value={subject.professor || '—'} />
+        <InfoCard label={subject.professors.length > 1 ? 'Profesores/as' : 'Profesor/a'} value={subject.professors.length ? subject.professors.join(', ') : '—'} />
         <InfoCard label="Aula / modalidad" value={subject.location || '—'} />
         <InfoCard label="Horario" value={subject.schedule || '—'} />
         <InfoCard label="Horas semanales" value={`${subject.weeklyHoursTarget} h`} />

@@ -19,7 +19,11 @@ export function SemestersSection() {
   return (
     <Card>
       <h3 className="font-medium text-ink">Semestres</h3>
-      <p className="mt-1 text-sm text-muted">Cada semestre agrupa sus propias materias y chats.</p>
+      <p className="mt-1 text-sm text-muted">
+        Esto es opcional: al crear una materia ya se guarda en un semestre automático, no hace falta
+        tocar nada acá. Solo sirve si querés separar materias viejas de las de ahora (por ejemplo, al
+        empezar un cuatrimestre nuevo).
+      </p>
 
       <div className="mt-3 flex flex-col gap-1.5">
         {semesters?.map((s) => (

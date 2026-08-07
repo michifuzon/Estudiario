@@ -25,7 +25,7 @@ export async function seedDemoData(): Promise<void> {
   const fisica = await subjectsRepo.create({
     semesterId: semester.id,
     name: 'Física',
-    professor: 'Prof. Álvarez',
+    professors: ['Prof. Álvarez'],
     schedule: 'Lun y Mié 18–20h',
     location: 'Aula 204',
     color: '#a5364a',
@@ -37,7 +37,7 @@ export async function seedDemoData(): Promise<void> {
   const matematica = await subjectsRepo.create({
     semesterId: semester.id,
     name: 'Matemática',
-    professor: 'Prof. Gómez',
+    professors: ['Prof. Gómez'],
     schedule: 'Mar y Jue 8–10h',
     location: 'Aula 108',
     color: '#3c4577',
@@ -49,7 +49,7 @@ export async function seedDemoData(): Promise<void> {
   const diseno = await subjectsRepo.create({
     semesterId: semester.id,
     name: 'Diseño',
-    professor: 'Prof. Ibáñez',
+    professors: ['Prof. Ibáñez'],
     schedule: 'Vie 14–18h',
     location: 'Taller 3',
     color: '#4c8c6e',
@@ -61,7 +61,7 @@ export async function seedDemoData(): Promise<void> {
   const tecnologia = await subjectsRepo.create({
     semesterId: semester.id,
     name: 'Tecnología',
-    professor: 'Prof. Duarte',
+    professors: ['Prof. Duarte'],
     schedule: 'Mié 10–13h',
     location: 'Lab. informático',
     color: '#b8862f',
