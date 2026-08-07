@@ -57,7 +57,11 @@ export const subjectMapper = {
     id: row.id,
     semesterId: row.semester_id,
     name: row.name,
-    professors: row.professor ?? [],
+    // Defensivo: si la migración 0004 (professor text -> text[]) todavía no
+    // corrió del lado de Supabase, esta columna puede seguir llegando como
+    // un string suelto en vez de arreglo — sin esto, cualquier .join()/
+    // .length sobre professors tira y rompe la pantalla de Materias entera.
+    professors: Array.isArray(row.professor) ? row.professor : row.professor ? [row.professor] : [],
     schedule: row.schedule,
     location: row.location,
     color: row.color,
